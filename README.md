@@ -25,4 +25,3 @@ Run the following command to start the server in development mode:
 ```
 npm run dev
 ```
-prueba
