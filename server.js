@@ -1,7 +1,8 @@
 import express from 'express';
 import morgan from 'morgan';
 import  { v4 as uuidv4 } from 'uuid';
-import cors from "cors"; 
+import cors from 'cors';
+
 const app = express();
 
 let agricultores = [
@@ -11,11 +12,11 @@ let agricultores = [
 
 app.use(express.json());
 app.use(morgan('tiny'));
-app.use(cors());
-
+app.use(cors()); // Habilitar CORS
 // API
 
 app.post('/agricultores', (req, res) => {
+    console.log("Solicitud recibida:", req.body);
     const agricultor = req.body;
     agricultor.id = uuidv4(); 
     agricultores.push(agricultor); 
@@ -89,3 +90,4 @@ app.delete('/agricultores/:id', (req, res) => {
 app.listen(3000, () => {
     console.log('Ready on port 3000!');
 });
+
