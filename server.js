@@ -4,35 +4,190 @@ import { v4 as uuidv4 } from 'uuid';
 import cors from 'cors';
 import { MongoClient, ObjectId } from 'mongodb';
 
-const dbName = 'social_group_DB';
-
 const app = express();
 
 app.use(express.json());
 app.use(morgan('tiny'));
 app.use(cors()); // Habilitar CORS
 
+uuidv4();
+
+// URL de conexión a MongoDB y nombre de la base de datos
 const mongoUrl = 'mongodb://localhost:27017/';
+const dbName = 'social_group_DB';
+let zonasCollection;
+let agricultoresCollection;
+//const zonasCollection = collection('zonas');
+//const agricultoresCollection = collection('agricultores');
+
+// Variable para almacenar la conexión a la base de datos
 let db;
+
+// Conectar a MongoDB
+
+//const ObjectID = require('mongodb').ObjectID;
 
 MongoClient.connect(mongoUrl, {useNewUrlParser: true, useUniFiedTopology: true})
     .then(client => {
         console.log('Conectado a MongoDB');
-        db = client.db(dbName);
+        db = client.db(dbName);// Asignar la base de datos
+        zonasCollection = database.collection('zonas');
+        agricultoresCollection = database.collection('agricultores');
+        //app.listen(5000, () => {
+            //console.log('server is running on port 5000');
+            //});
+
     })
     .catch(err => {
         console.error('Error al conectar MongoDB:', err);
     });
 
 // API
+
+//POST
+export const createAgricultor = async (agricultor) => {
+    try {
+        const newAgricultor = {
+            "id": uuidv4(),
+            fotoPerfil: agricultor.fotoPerfil,
+            nombre:agricultor.nombre,
+             apellido:agricultor.apellido,
+             direccion:agricultor.direccion,
+             telefono:agricultor.telefono,
+             email:agricultor.email,
+             //Espacio / Huerta
+             localizacion:agricultor.localizacion,
+             horario:agricultor.horarios,
+             descripcion:agricultor.descripcion,
+            //Espacio / Productos
+            tipoCaja:agricultor.tipoCaja,
+            disponibilidad:agricultor.disponibilidad,
+            precio:agricultor.precio,
+            envioRecogida:agricultor.envioRecogida,
+            tipoPago:agricultor.tipoPago,
+            "createdAt": new Date(),
+            "updatedAt": new Date(),
+        }
+        return await agricultoresCollection.insertOne(newAgricultor);
+    }
+    catch (error) { 
+        console.error('Error al crear un Agricultor:', error);
+        res.status(500).json({ error: 'Hubo un problema al crear un Agricultor' }); 
+    } 
+}
+
+app.post('/agricultores/', async (req, res) => {
+    const body = req.body;
+    const newAgricultor = await createAgricultor(body);
+    res.json(newAgricultor);
+});
+
+//get all agricultores
+
+export const getAllAgricultores = async () => {
+    try { 
+        const agricultores = await agricultoresCollection.find({}, options).toArray();
+        console.log("The agricultores are in servers");
+        return agricultores;
+    } 
+    catch (error) { 
+        console.error('Error al obtener un agricultores:', error);
+        res.status(500).json({ error: 'Hubo un problema al obtener un agricultores' }); 
+    } 
+};
+
+app.get('/agricultores', async (req, res) => {
+    console.log("get all agricultores");
+    const allagricultores = await getAllAgricultores();
+    console.log("get all agricultores");
+    res.json(allagricultores);
+});
+
+//Get a Agricultor  por ID
+
+export const getAgricultorbyId = async (agricultorId) => {
+    try { 
+        const filter = {id: agricultorId};
+        const agricultor = await agricultoresCollection.findOne(filter, options);
+        console.log("The agricultor is in the server");
+        console.log(agricultor);
+        console.log(agricultorId);
+        console.log(agricultor);
+        return agricultor;
+    } 
+    catch (error) { 
+        console.error('Error al obtener un agricultor:', error);
+        res.status(500).json({ error: 'Hubo un problema al obtener un agricultor' }); 
+    } 
+};
+
+app.get('/agricultor/id/:id', async (req, res) => { 
+    const agricultorId = req.params.id;
+    console.log(agricultorId);
+    const theagricultor = await getAgricultorbyId(agricultorId);
+    res.json(theagricultor);
+    console.log(theagricultor);
+    console.log(agricultorId);
+    console.log("The agricultor is out");
+}); 
+
+// Endpoint para obtener agricultores por zonas
+//TODO: xq estan poniendo un index.html en la ruta? no es necesario
+app.get('/', async (req, res) => {
+    try {
+        console.log("conectando a mongodb");
+        if (!db) {
+            return res.status(500).json({error: 'la conexión a la base de datos no está lista'});
+        }
+        const data = await db.collection('zonas').find().toArray();
+        console.log('datos obtenidos:', data);
+        res.json(data);
+    } catch (err) {
+        console.error('Error al obtener los datos:', err);
+        res.status(500).json({error: err.message});
+    }
+});
+
+// Endpoint para obtener zonas
+//TODO: xq estan poniendo un index.html en la ruta? no es necesario
+app.get('/:id/agricultores', async (req, res) => {
+    // si tuviesemos filtros irian aqui? const {por caja por no se}
+    const zonasId = req.params.id;
+    try {
+        let AgriculturesPorZonas = await db.collection('agricultores').find({zonaId: new ObjectId(zonasId)}).toArray();
+
+        //if (cajaId) {
+        // agricultoresPorZonas = agricultoresPorZonas.filter((agricultores) => agricultores.caja === cajaId);
+        // }
+
+        res.json(agricultoresPorZonas);
+    } catch (error) {
+        console.error('Error al obtener agricultores:', error);
+        res.status(500).json({error: 'hubo un problema al obtener datos'});
+    }
+});
+
+//pruebas pasadas post
+/*function createAgricultor(agricultor) {
+    db.collection('AGRICULTORES').insertOne(agricultor) 
+    .then(result => {
+    console.log('Agricultor añadido:', result.insertedId);
+    })
+    .catch(err => {
+        console.error('Error al añadir agricultor:', err);   
+        });   
+        }
+
 app.post('/agricultores', (req, res) => {
     const agricultor = req.body;
     agricultor.id = uuidv4();
     agricultor.createdAt = new Date();
     agricultor.updatedAt = new Date();
-    createAgricultor(agricultor); // TODO esta funcion tiene que estar declarada antes del endpoint post
+
+    createAgricultor(agricultor);
     res.json(agricultor);
-});
+});*/
+
 //  let peticion = req.body;  try {
 //Connect to the "insertDB" database and access its "haiku" collection
 //const database = client.db("social_group_DB");
@@ -67,6 +222,7 @@ app.post('/agricultores', (req, res) => {
 //get all agricultores
 // TODO const getAgricultores = ('/agricultores') => { esto lo quite por que no puedes pasar un string como parametro
 // TODO he quitado el parametro, pero si esto es un endpoint revisalo xq no es correcta la definicion
+/*
 const getAgricultores = () => {
     return new Promise((resolve, reject) => {
         agricultoresColection.find().toArray((err, result) => {
@@ -80,8 +236,15 @@ const getAgricultores = () => {
 }
 
 // Endpoint para obtener el detalle de un agricultor por ID
-// TODO: tenian esto /agricultor/:id en el parametro, pero no es correcto, lo cambie a agriculotorId
+// TODO: tenian esto /agricultor/:id en el parametro, pero no es correcto, lo cambie a agricultorId
 // TODO: creo que lo que quieren hacer aqui es un endpoint para obtener 1 solo agricultor por id, revisen la forma de definir los endpoints
+/*
+app.get('/agricultor/id/:id', async (req, res) => {
+    const agricultorId = req.params.id;   // Obtener el ID de los parámetros de la URL
+    console.log(agricultorId);
+    const agricultorn = await getAgricultorbyId(agricultorId);
+    
+})
 function getAgricultor(agricultorId) {
     return new Promise((resolve, reject) => {
         agricultoresColection.findOne({_id: ObjectId(agricultorId)})
@@ -90,8 +253,23 @@ function getAgricultor(agricultorId) {
     });
 }
 
-//, //(req, res) => {
-//const agricultorId = req.params.id; // Obtener el ID de los parámetros de la URL
+/* si quisieramos ordenar por orden de lista:
+export const getAllAgricultores = async () => {
+    try { 
+      const options = {
+        sort: { "nombre": 1 }, // Ordena por nombre en orden ascendente (alfabético)
+        projection: { nombre: 1, zona: 1, telefono: 1, descripcion: 1, _id: 0 }
+      };
+      const agricultores = await db.collection('AGRICULTORES').find({}, options).toArray();
+      console.log("Los agricultores han sido obtenidos del servidor.");
+      return agricultores;
+    } 
+    catch (error) { 
+      console.error('Error al obtener los agricultores:', error);
+      res.status(500).json({ error: 'Hubo un problema al obtener los agricultores' }); 
+    } 
+  };*/
+
 // Buscar el agricultor en la lista
 // const agricultor = agricultores.find((agricultor) => agricultor.id === agricultorId);
 
@@ -102,41 +280,7 @@ function getAgricultor(agricultorId) {
 // }
 // });
 
-// Endpoint para obtener zonas
-//TODO: xq estan poniendo un index.html en la ruta? no es necesario
-app.get('/index.html/:id/agricultores', async (req, res) => {
-    // si tuviesemos filtros irian aqui? const {por caja por no se}
-    const zonasId = req.params.id;
-    try {
-        let AgriculturesPorZonas = await db.collection('agricultores').find({zonaId: new ObjectId(zonasId)}).toArray();
 
-        //if (cajaId) {
-        // agricultoresPorZonas = agricultoresPorZonas.filter((agricultores) => agricultores.caja === cajaId);
-        // }
-
-        res.json(agricultoresPorZonas);
-    } catch (error) {
-        console.error('Error al obtener agricultores:', error);
-        res.status(500).json({error: 'hubo un problema al obtener datos'});
-    }
-});
-
-// Endpoint para obtener agricultores por zonas
-//TODO: xq estan poniendo un index.html en la ruta? no es necesario
-app.get('/index.html', async (req, res) => {
-    try {
-        console.log("conectando a mongodb");
-        if (!db) {
-            return res.status(500).json({error: 'la conexión a la base de datos no está lista'});
-        }
-        const data = await db.collection('zonas').find().toArray();
-        console.log('datos obtenidos:', data);
-        res.json(data);
-    } catch (err) {
-        console.error('Error al obtener los datos:', err);
-        res.status(500).json({error: err.message});
-    }
-});
 
 
 //opcionales:

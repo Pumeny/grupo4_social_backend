@@ -12,18 +12,21 @@ db.createCollection('agricultores');
 db.zonas.insertMany([
 
     {nombre:"Horta Nord", 
+      id: "1"
     },
     {nombre:"Horta Sur", 
+      id: "2"
     },
     {nombre:"Horta Est", 
+      id: "3"
     },
 ]);
 
-let zonasId = db.zonas.findOne({nombre: "Horta Nord"})._id;
+let zonasId = db.zonas.findOne({nombre: "Horta Nord"}).id;
 
 db.agricultores.insertMany([
     {
-    //fotoPerfil: "url",
+    fotoPerfil: "vscode-remote://wsl%2Bdebian/home/pumeny/workspace/grupo4_social_front/assets/esther.webp",
     nombre:"Ana", 
     apellido:"Rodríguez",
     direccion:"calle matata, 3",
@@ -39,10 +42,10 @@ db.agricultores.insertMany([
     precio:"30€",
     envioRecogida:"Envío",
     tipoPago:"Tarjeta",
-    zonaID: zonasId
+    zonaId: "1"
     },
 ]);
-    zonasId = db.zonas.findOne({nombre: "Horta Est"})._id;
+    zonasId = db.zonas.findOne({nombre: "Horta Est"}).id;
 
     db.agricultores.insertMany([
     {
@@ -62,10 +65,10 @@ db.agricultores.insertMany([
     precio:"35€",
     envioRecogida:"Envío",
     tipoPago:"Tarjeta",
-    zonaID: zonasId
+    zonaId: id
     },
 ]);
-    zonasId = db.zonas.findOne({nombre: "Horta Sud"})._id;
+    zonasId = db.zonas.findOne({nombre: "Horta Sud"}).id;
 
     db.agricultores.insertMany([
 
@@ -86,15 +89,15 @@ db.agricultores.insertMany([
             precio:"25€",
             envioRecogida:"Recogida",
             tipoPago:"Efectivo",
-            zonaID: zonasId
+            zonaId: id
             },
  ]);
 
  let zonaBusqueda = "Horta Nord";//duda si solo se hace de una zona o de todas
 
-let zonaId = db.zonas.findOne({ nombre: zonaBusqueda })._id;
+//let zonaId = db.zonas.findOne({ nombre: zonaBusqueda }).id;
 
-let agricultores = db.agricultores.find({ zonaId: zonaId }).toArray();
+//let agricultores = db.agricultores.find({ zonaId: zonaId }).toArray();
 
 
 // The prototype form to create a collection:
