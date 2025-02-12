@@ -9,6 +9,7 @@ use('social_group_DB');
 db.createCollection('zonas');
 db.createCollection('agricultores');
 
+
 db.zonas.insertMany([
 
     {nombre:"Horta Nord", 
@@ -39,7 +40,7 @@ db.agricultores.insertMany([
     precio:"30€",
     envioRecogida:"Envío",
     tipoPago:"Tarjeta",
-    zonaID: zona._id
+    zonaId: zona._id
     },
 ]);
     zona = db.zonas.findOne({nombre: "Horta Est"});
@@ -62,7 +63,7 @@ db.agricultores.insertMany([
     precio:"35€",
     envioRecogida:"Envío",
     tipoPago:"Tarjeta",
-    zonaID: zona._id
+    zonaId: zona._id
     },
 ]);
     zona = db.zonas.findOne({nombre: "Horta Sur"});
@@ -86,7 +87,7 @@ db.agricultores.insertMany([
             precio:"25€",
             envioRecogida:"Recogida",
             tipoPago:"Efectivo",
-            zonaID: zona._id
+            zonaId: zona._id
             },
  ]);
 
@@ -96,6 +97,7 @@ zona = db.zonas.findOne({ nombre: zonaBusqueda });
 
 let agricultores = db.agricultores.find({ zonaId: zona._id }).toArray();
 
+//db.collection('agricultores').find({id: agricultorId})
 
 // The prototype form to create a collection:
 /* db.createCollection( <name>,

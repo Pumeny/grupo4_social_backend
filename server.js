@@ -13,10 +13,11 @@ app.use(cors()); // Habilitar CORS
 uuidv4();
 
 // URL de conexión a MongoDB y nombre de la base de datos
-const mongoUrl = 'mongodb://localhost:27017/';
+const mongoUrl = 'mongodb://127.0.0.1:27017/';
 const dbName = 'social_group_DB';
 let zonasCollection;
 let agricultoresCollection;
+
 //const zonasCollection = collection('zonas');
 //const agricultoresCollection = collection('agricultores');
 
@@ -27,7 +28,7 @@ let db;
 
 //const ObjectID = require('mongodb').ObjectID;
 
-MongoClient.connect(mongoUrl, {useNewUrlParser: true, useUniFiedTopology: true})
+MongoClient.connect(mongoUrl) //{useNewUrlParser: true, useUniFiedTopology: true})
     .then(client => {
         console.log('Conectado a MongoDB');
         db = client.db(dbName);// Asignar la base de datos
@@ -84,7 +85,7 @@ app.post('/agricultores/', async (req, res) => {
 
 //get all agricultores
 
-export const getAllAgricultores = async (res) => {
+export const getAgricultores = async (req, res) => {
     try { 
         const agricultores = await agricultoresCollection.find({}).toArray();
         console.log("The agricultores are in servers");
@@ -96,40 +97,40 @@ export const getAllAgricultores = async (res) => {
     } 
 };
 
+//Endpoint para obtener agricultores
 app.get('/agricultores', async (req, res) => {
     console.log("get all agricultores");
-    const allagricultores = await getAllAgricultores(res);
+    const allagricultores = await getAgricultores(res);
     console.log("get all agricultores");
     res.json(allagricultores);
 });
 
 //Get a Agricultor  por ID
 
-export const getAgricultorbyId = async (agricultorId) => {
-    try { 
-        const filter = {id: agricultorId};
-        const agricultor = await agricultoresCollection.findOne(filter, options);
-        console.log("The agricultor is in the server");
-        console.log(agricultor);
-        console.log(agricultorId);
-        console.log(agricultor);
+export const getAgricultor = async (agricultorId) => {
+    try {
+        const agricultor = await agricultoresCollection.findOne({ _id: new ObjectId(agricultorId) });
+        if (!agricultor) {
+            console.warn(`No se encontró un agricultor con ID: ${agricultorId}`);
+            return null;
+        }
         return agricultor;
-    } 
-    catch (error) { 
-        console.error('Error al obtener un agricultor:', error);
-        res.status(500).json({ error: 'Hubo un problema al obtener un agricultor' }); 
-    } 
+    } catch (error) {
+        console.error('Error al obtener agricultor:', error);
+        throw error;
+    }
 };
 
-app.get('/agricultor/id/:id', async (req, res) => { 
+// Endpoint para obtener un agricultor
+app.get('/agricultores/:id', async(req, res) => {
     const agricultorId = req.params.id;
     console.log(agricultorId);
-    const theagricultor = await getAgricultorbyId(agricultorId);
-    res.json(theagricultor);
-    console.log(theagricultor);
-    console.log(agricultorId);
-    console.log("The agricultor is out");
-}); 
+    // Buscar agricultor por ID   
+    //TODO recuerden que tienen que buscar en DB y debe ser algo como: db.collection('agricultores').find({id: agricultorId})
+    const agricultor = await getAgricultor(agricultorId);
+    console.log("get agricultor by id");
+    res.json(agricultor);
+});
 
 // Endpoint para obtener agricultores por zonas
 //TODO: xq estan poniendo un index.html en la ruta? no es necesario
@@ -149,23 +150,24 @@ app.get('/', async (req, res) => {
 });
 
 // Endpoint para obtener zonas
-//TODO: xq estan poniendo un index.html en la ruta? no es necesario
+
 app.get('/:id/agricultores', async (req, res) => {
-    // si tuviesemos filtros irian aqui? const {por caja por no se}
+    /*si tuviesemos filtros irian aqui? const {por caja por no se}
     const zonasId = req.params.id;
     try {
         let AgriculturesPorZonas = await db.collection('agricultores').find({zonaId: new ObjectId(zonasId)}).toArray();
-
-        //if (cajaId) {
-        // agricultoresPorZonas = agricultoresPorZonas.filter((agricultores) => agricultores.caja === cajaId);
-        // }
-
-        res.json(agricultoresPorZonas);
-    } catch (error) {
-        console.error('Error al obtener agricultores:', error);
-        res.status(500).json({error: 'hubo un problema al obtener datos'});
-    }
-});
+     if (cajaId) { agricultoresPorZonas = agricultoresPorZonas.filter((agricultores) => agricultores.caja === cajaId); }*/
+     const zonasId = req.params.id;
+     try {
+         let AgriculturesPorZonas = await db.collection('agricultores').find({zonaId: new ObjectId(zonasId)}).toArray();
+         res.json(agricultoresPorZonas);
+        } catch (error) {
+            console.error('Error al obtener agricultores:', error);
+            res.status(500).json({error: 'hubo un problema al obtener datos'});
+        }
+    });
+  
+  
 
 //pruebas pasadas post
 /*function createAgricultor(agricultor) {
