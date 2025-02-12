@@ -31,8 +31,8 @@ MongoClient.connect(mongoUrl, {useNewUrlParser: true, useUniFiedTopology: true})
     .then(client => {
         console.log('Conectado a MongoDB');
         db = client.db(dbName);// Asignar la base de datos
-        zonasCollection = database.collection('zonas');
-        agricultoresCollection = database.collection('agricultores');
+        zonasCollection = db.collection('zonas');
+        agricultoresCollection = db.collection('agricultores');
         //app.listen(5000, () => {
             //console.log('server is running on port 5000');
             //});
@@ -84,9 +84,9 @@ app.post('/agricultores/', async (req, res) => {
 
 //get all agricultores
 
-export const getAllAgricultores = async () => {
+export const getAllAgricultores = async (res) => {
     try { 
-        const agricultores = await agricultoresCollection.find({}, options).toArray();
+        const agricultores = await agricultoresCollection.find({}).toArray();
         console.log("The agricultores are in servers");
         return agricultores;
     } 
@@ -98,7 +98,7 @@ export const getAllAgricultores = async () => {
 
 app.get('/agricultores', async (req, res) => {
     console.log("get all agricultores");
-    const allagricultores = await getAllAgricultores();
+    const allagricultores = await getAllAgricultores(res);
     console.log("get all agricultores");
     res.json(allagricultores);
 });
