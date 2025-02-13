@@ -132,6 +132,102 @@ app.get('/agricultores/:id', async(req, res) => {
     res.json(agricultor);
 });
 
+//opcionales:
+
+// Endpoint para actualizar un agricultor
+app.put('/agricultores/:id', (req, res) => {
+    const agricultorId = req.params.id;
+    const {name, lastname, description, direction, phoneNumber, mail} = req.body;
+
+    // Buscar agricultor por ID
+    //TODO donde esta definida la variable agricultores?
+    //TODO recuerden que tienen que buscar en DB y debe ser algo como: db.collection('agricultores').find({id: agricultorId})
+    const agricultor = agricultores.find((agricultor) => agricultor.id === agricultorId);
+
+    if (!agricultor) {
+        return res.status(404).json({error: "Agricultor no encontrado"});
+    }
+
+    // Actualizar solo los campos enviados en la petición
+    if (name) agricultor.name = name;
+    if (lastname) agricultor.lastname = lastname;
+    if (description) agricultor.description = description;
+    if (direction) agricultor.direction = direction;
+    if (phoneNumber) agricultor.phoneNumber = phoneNumber;
+    if (mail) agricultor.mail = mail;
+
+    res.json({
+        message: "Agricultor actualizado con éxito",
+        updatedAgricultor: agricultor,
+    });
+});
+
+// Endpoint para eliminar un agricultor
+app.delete('/agricultores/:id', (req, res) => {
+    const agricultorId = req.params.id;
+
+    // Buscar la posición del agricultor en el array
+    const index = agricultores.findIndex((agricultor) => agricultor.id === agricultorId);
+
+    if (index === -1) {
+        return res.status(404).json({error: "Agricultor no encontrado"});
+    }
+
+    // Eliminar agricultor del array
+    agricultores.splice(index, 1);
+
+    res.json({message: "Agricultor eliminado con éxito"});
+});
+
+// Endpoint para obtener usuarios con filtros (nombre y apellido)
+
+app.get('/usuarios', async (req, res) => {
+
+    const { nombre, apellido } = req.query; // Capturamos los parámetros de la URL
+  
+     
+  
+    const query = {}; // Objeto para construir los filtros
+  
+  
+  
+    if (nombre) {
+  
+      query.nombre = { $regex: nombre, $options: 'i' }; // Búsqueda insensible a mayúsculas
+  
+    }
+  
+  
+  
+    if (apellido) {
+  
+      query.apellido = { $regex: apellido, $options: 'i' }; // Búsqueda insensible a mayúsculas
+  
+    }
+  
+  
+  
+    try {
+  
+      const usuariosFiltrados = await db.collection('usuarios').find(query).toArray();
+  
+      res.json(usuariosFiltrados); // Devolvemos los usuarios filtrados
+  
+    } catch (error) {
+  
+      console.error('Error al obtener usuarios:', error);
+  
+      res.status(500).json({ error: 'Hubo un problema al obtener los usuarios' });
+  
+    }
+  
+  });
+  
+  
+  
+ // y la llamada al endpoint sería algo así:
+  
+  //usuarios?nombre=Juan&apellido=Pérez 
 // Endpoint para obtener agricultores por zonas
 //TODO: xq estan poniendo un index.html en la ruta? no es necesario
 app.get('/', async (req, res) => {
@@ -168,6 +264,7 @@ app.get('/:id/agricultores', async (req, res) => {
     });
   
   
+//filtros: 
 
 //pruebas pasadas post
 /*function createAgricultor(agricultor) {
@@ -281,56 +378,6 @@ export const getAllAgricultores = async () => {
 // res.status(404).json({ error: "Agricultor no encontrado" }); // Enviar error si no existe
 // }
 // });
-
-
-
-
-//opcionales:
-
-// Endpoint para actualizar un agricultor
-app.put('/agricultores/:id', (req, res) => {
-    const agricultorId = req.params.id;
-    const {name, lastname, description, direction, phoneNumber, mail} = req.body;
-
-    // Buscar agricultor por ID
-    //TODO donde esta definida la variable agricultores?
-    //TODO recuerden que tienen que buscar en DB y debe ser algo como: db.collection('agricultores').find({id: agricultorId})
-    const agricultor = agricultores.find((agricultor) => agricultor.id === agricultorId);
-
-    if (!agricultor) {
-        return res.status(404).json({error: "Agricultor no encontrado"});
-    }
-
-    // Actualizar solo los campos enviados en la petición
-    if (name) agricultor.name = name;
-    if (lastname) agricultor.lastname = lastname;
-    if (description) agricultor.description = description;
-    if (direction) agricultor.direction = direction;
-    if (phoneNumber) agricultor.phoneNumber = phoneNumber;
-    if (mail) agricultor.mail = mail;
-
-    res.json({
-        message: "Agricultor actualizado con éxito",
-        updatedAgricultor: agricultor,
-    });
-});
-
-// Endpoint para eliminar un agricultor
-app.delete('/agricultores/:id', (req, res) => {
-    const agricultorId = req.params.id;
-
-    // Buscar la posición del agricultor en el array
-    const index = agricultores.findIndex((agricultor) => agricultor.id === agricultorId);
-
-    if (index === -1) {
-        return res.status(404).json({error: "Agricultor no encontrado"});
-    }
-
-    // Eliminar agricultor del array
-    agricultores.splice(index, 1);
-
-    res.json({message: "Agricultor eliminado con éxito"});
-});
 
 
 app.listen(3000, () => {
